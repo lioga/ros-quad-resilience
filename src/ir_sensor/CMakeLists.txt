@@ -122,6 +122,9 @@ include_directories(
 add_library(${PROJECT_NAME}
   ADC_Navio2.cpp
   ADC_Navio2.h
+  MedianFilter.cpp
+  MedianFilter.h
+
 )
 
 ## Add cmake target dependencies of the library

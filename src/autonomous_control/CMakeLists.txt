@@ -117,9 +117,11 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/autonomous_control.cpp
-# )
+add_library(${PROJECT_NAME}
+  autonomous_helper.hpp
+  autonomous_helper.cpp
+
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -129,8 +131,8 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(autonomous_control autonomous_control.cpp)
-target_link_libraries(autonomous_control ${catkin_LIBRARIES})
+add_executable(autonomous_control_node autonomous_control_node.cpp)
+target_link_libraries(autonomous_control_node ${catkin_LIBRARIES} autonomous_control)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
