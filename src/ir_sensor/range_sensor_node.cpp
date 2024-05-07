@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     unfiltered_reading = medFilt->in(unfiltered_reading);
     reading_in_volt = unfiltered_reading/1000.0;
     range.range = 604.95 * pow(reading_in_volt,-1.1904); //if 604.95 then it is in mm format
-    ROS_INFO("in mm %f",range.range);
+    //ROS_INFO("in mm %f",range.range);
     gps_pose.pose.position.z = range.range; 
     range_pub.publish(range);
     gps_pose_pub.publish(gps_pose);

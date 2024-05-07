@@ -520,6 +520,14 @@ int init_publisher_subscriber(ros::NodeHandle controlnode)
 	command_client = controlnode.serviceClient<mavros_msgs::CommandLong>((ros_namespace + "/mavros/cmd/command").c_str());
 	
 	att_raw_pub = controlnode.advertise<mavros_msgs::AttitudeTarget>((ros_namespace + "/mavros/setpoint_raw/attitude").c_str(), 10);
+	att_visualisation = controlnode.advertise<mavros_msgs::AttitudeTarget>((ros_namespace + "/set_point_visualization").c_str(), 10);
 	
 	return 0;
+}
+
+void sigint_handler(int sig){
+	ROS_INFO("Process is killed, landing...");
+	land();      
+	ros::Duration(3).sleep();
+	ros::shutdown();
 }

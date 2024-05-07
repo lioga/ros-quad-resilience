@@ -25,6 +25,15 @@
 #include <mavros_msgs/Thrust.h>
 #include <mavros_msgs/AttitudeTarget.h> 
 #include <time.h>
+#include <random>
+#include <signal.h>
+
+enum Cyber_Attack_Type{
+    NO_ATTACK,
+    DOS_ATTACK,
+    FDI_ATTACK,
+    RAMP_ATTACK,
+};
 
 mavros_msgs::State current_state_g;
 nav_msgs::Odometry current_pose_g;
@@ -38,6 +47,7 @@ float correction_heading_g = 0;
 float local_desired_heading_g; 
 
 ros::Publisher att_raw_pub;
+ros::Publisher att_visualisation;
 ros::Publisher local_pos_pub;
 ros::Publisher global_lla_pos_pub;
 ros::Publisher global_lla_pos_pub_raw;
@@ -79,3 +89,5 @@ int set_yaw(float angle, float speed, float dir, float absolute_rel);
 int takeoff_global(float lat, float lon, float alt);
 
 int init_publisher_subscriber(ros::NodeHandle controlnode);
+
+void sigint_handler(int sig);
