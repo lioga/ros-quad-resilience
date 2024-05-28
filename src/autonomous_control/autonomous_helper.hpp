@@ -27,7 +27,8 @@
 #include <time.h>
 #include <random>
 #include <signal.h>
-
+#include <tf/transform_datatypes.h>
+#include <vector> 
 enum Cyber_Attack_Type{
     NO_ATTACK,
     DOS_ATTACK,
@@ -46,6 +47,11 @@ float local_offset_g;
 float correction_heading_g = 0;
 float local_desired_heading_g; 
 
+double cur_roll, cur_pitch, cur_yaw;
+double target_roll, target_pitch, target_yaw;
+
+mavros_msgs::AttitudeTarget att;
+ros::Publisher pos_raw_pub;
 ros::Publisher att_raw_pub;
 ros::Publisher att_visualisation;
 ros::Publisher local_pos_pub;
@@ -70,7 +76,7 @@ geometry_msgs::Point get_current_location();
 
 void set_heading(float heading);
 void set_destination(float x, float y, float z, float psi);
-void set_att_destination(float or_x, float or_y, float or_z, float or_w, float z);
+void set_att_destination(mavros_msgs::AttitudeTarget att_target);
 void set_destination_lla(float lat, float lon, float alt, float heading);
 void set_destination_lla_raw(float lat, float lon, float alt, float heading);
 
@@ -81,7 +87,7 @@ int initialize_local_frame();
 int arm();
 int takeoff(float takeoff_alt);
 int check_waypoint_reached(float pos_tolerance=0.3, float heading_tolerance=0.01);
-int check_waypoint_att_reached(float pos_tolerance=0.3);
+int check_waypoint_att_reached(float pos_tolerance, mavros_msgs::AttitudeTarget att_target);
 int set_mode(std::string mode);
 int land();
 

@@ -1,8 +1,3 @@
-//>>> TO:DO
-// get adc readings from the ir sensor
-// make conversion ==>  m = 0.60495 * pow(volts,-1.1904);
-// publish sensor_msgs/Range msg to /mavros/distance_sensor/rangefinder_sub topic
-
 #include "ADC_Navio2.h"
 #include <sensor_msgs/Range.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -11,13 +6,12 @@
 #include <iostream>
 #include "MedianFilter.h"
 
-
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "sharp_range_publish");
   ros::NodeHandle nh;
 
-  ros::Rate rate(10); //it was 20 before
+  ros::Rate rate(100); 
   ros::Publisher range_pub = nh.advertise<sensor_msgs::Range>("/mavros/distance_sensor/distance_sensor_sub", 100);
   ros::Publisher gps_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/mavros/fake_gps/mocap/pose", 100);
   
@@ -31,12 +25,12 @@ int main(int argc, char** argv)
   gps_pose.header.stamp = ros::Time::now();
   gps_pose.header.seq=count;
   gps_pose.header.frame_id = 1;
-  gps_pose.pose.position.x = 0.0;
+  gps_pose.pose.position.x = 0.0; //xy is always 0 because we are on a test-bench
   gps_pose.pose.position.y = 0.0;
   
-  gps_pose.pose.orientation.x = 0;
-  gps_pose.pose.orientation.y = 0;
-  gps_pose.pose.orientation.z = 0;
+  gps_pose.pose.orientation.x = 0; //we send 0 for attitude but in the 
+  gps_pose.pose.orientation.y = 0; //ardupilot parameters we will tell that 
+  gps_pose.pose.orientation.z = 0; //don't use gps data for attitude 
   gps_pose.pose.orientation.w = 0;
 
   auto medFilt = new MedianFilter(9,1500);
@@ -52,7 +46,7 @@ int main(int argc, char** argv)
     unfiltered_reading = medFilt->in(unfiltered_reading);
     reading_in_volt = unfiltered_reading/1000.0;
     range.range = 604.95 * pow(reading_in_volt,-1.1904); //if 604.95 then it is in mm format
-    //ROS_INFO("in mm %f",range.range);
+    
     gps_pose.pose.position.z = range.range; 
     range_pub.publish(range);
     gps_pose_pub.publish(gps_pose);

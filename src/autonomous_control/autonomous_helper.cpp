@@ -113,19 +113,10 @@ void set_destination(float x, float y, float z, float psi)
 	
 }
 
-void set_att_destination(float or_x, float or_y, float or_z, float or_w, float z)
+void set_att_destination(mavros_msgs::AttitudeTarget att_target)
 {
-
-	waypoint_g.pose.position.x = 0;
-	waypoint_g.pose.position.y = 0;
-	waypoint_g.pose.position.z = z;
-	waypoint_g.pose.orientation.x = or_x;
-	waypoint_g.pose.orientation.y = or_y;
-	waypoint_g.pose.orientation.z = or_z;
-	waypoint_g.pose.orientation.w = or_w;
-
 	
-	local_pos_pub.publish(waypoint_g);
+	att_raw_pub.publish(att_target);
 	
 }
 void set_destination_lla(float lat, float lon, float alt, float heading)
@@ -368,22 +359,29 @@ int check_waypoint_reached(float pos_tolerance, float heading_tolerance)
 	}
 }
 
-int check_waypoint_att_reached(float pos_tolerance)
+int check_waypoint_att_reached(float pos_tolerance, mavros_msgs::AttitudeTarget att_target)
 {
-	local_pos_pub.publish(waypoint_g);
+	att_raw_pub.publish(att_target);
 	
-	//check for correct position 
-	float deltaX = abs(waypoint_g.pose.orientation.x - current_pose_g.pose.pose.orientation.x);
-    float deltaY = abs(waypoint_g.pose.orientation.y - current_pose_g.pose.pose.orientation.y);
-    float deltaZ = abs(waypoint_g.pose.orientation.z - current_pose_g.pose.pose.orientation.z);
-    float deltaW = abs(waypoint_g.pose.orientation.w - current_pose_g.pose.pose.orientation.w);
+	tf::Quaternion q_tar(att_target.orientation.x, att_target.orientation.y, att_target.orientation.z, att_target.orientation.w);
+	tf::Matrix3x3 m_tar(q_tar);
+	m_tar.getRPY(target_roll, target_pitch, target_yaw);
 
-    float deltaAltZ = 0; //abs(waypoint_g.pose.position.z - current_pose_g.pose.pose.position.z);
-    float dMag = sqrt( pow(deltaX, 2) + pow(deltaY, 2) + pow(deltaZ, 2) + pow(deltaW, 2) + pow(deltaAltZ, 2));
-    ROS_INFO("dMag %f", dMag);
-    ROS_INFO("current pose x %F y %f z %f w %f", (current_pose_g.pose.pose.orientation.x), (current_pose_g.pose.pose.orientation.y), (current_pose_g.pose.pose.orientation.z) ); //(current_pose_g.pose.pose.position.z)
-    ROS_INFO("waypoint pose x %F y %f z %f w %f height: %f", waypoint_g.pose.orientation.x, waypoint_g.pose.orientation.y, waypoint_g.pose.orientation.z, waypoint_g.pose.orientation.w, waypoint_g.pose.position.z );
-    //check orientation
+	tf::Quaternion q_cur(current_pose_g.pose.pose.orientation.x, current_pose_g.pose.pose.orientation.y, current_pose_g.pose.pose.orientation.z, current_pose_g.pose.pose.orientation.w);
+	tf::Matrix3x3 m_cur(q_cur);
+	m_cur.getRPY(cur_roll, cur_pitch, cur_yaw);
+
+	//check for correct position 
+	float delta_roll = abs(target_roll - cur_roll);
+    float delta_pitch = abs(target_pitch - cur_pitch);
+    float delta_yaw = abs(target_yaw - cur_yaw);
+
+    
+    ROS_INFO("current pose roll %F pitch %f yaw %f", cur_roll, cur_pitch, cur_yaw); //(current_pose_g.pose.pose.position.z)
+    ROS_INFO("waypoint pose roll %F pitch %f yaw %f", target_roll, target_pitch, target_yaw);
+    ROS_INFO("delta roll %F pitch %f yaw %f", delta_roll, delta_pitch, delta_yaw);
+    
+	//check orientation
    //float cosErr = cos(current_heading_g*(M_PI/180)) - cos(local_desired_heading_g*(M_PI/180));
     //float sinErr = sin(current_heading_g*(M_PI/180)) - sin(local_desired_heading_g*(M_PI/180));
     
@@ -393,7 +391,7 @@ int check_waypoint_att_reached(float pos_tolerance)
     // ROS_INFO("local_desired_heading_g %f", local_desired_heading_g);
     // ROS_INFO("current heading error %f", headingErr);
 
-    if( dMag < pos_tolerance )
+    if( delta_pitch < pos_tolerance && delta_roll < pos_tolerance && delta_yaw < pos_tolerance )
 	{
 		return 1;
 	}else{
@@ -520,6 +518,7 @@ int init_publisher_subscriber(ros::NodeHandle controlnode)
 	command_client = controlnode.serviceClient<mavros_msgs::CommandLong>((ros_namespace + "/mavros/cmd/command").c_str());
 	
 	att_raw_pub = controlnode.advertise<mavros_msgs::AttitudeTarget>((ros_namespace + "/mavros/setpoint_raw/attitude").c_str(), 10);
+	pos_raw_pub = controlnode.advertise<mavros_msgs::PositionTarget>((ros_namespace + "/mavros/setpoint_raw/local").c_str(), 10);
 	att_visualisation = controlnode.advertise<mavros_msgs::AttitudeTarget>((ros_namespace + "/set_point_visualization").c_str(), 10);
 	
 	return 0;
