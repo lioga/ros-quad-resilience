@@ -1,6 +1,8 @@
 # Assessing Quadrotor Control System Resilience: Designing a Test-bench for Cyber Attack Analysis 
 In this project, we designed a dedicated test-bench for quadrotors to analyze the impact of cyber-attacks on control algorithms. The proposed test platform features three-axis rotation (pitch, roll, yaw) and single-axis displacement capabilities (z-axis), providing four degrees of freedom.
 
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/v-5AVn8u_QA/0.jpg)](https://www.youtube.com/watch?v=v-5AVn8u_QA)
+
 ## Key Features
 
 - Four Degrees of Freedom: Three-axis rotation (pitch, roll, yaw) and single-axis displacement (z-axis).
